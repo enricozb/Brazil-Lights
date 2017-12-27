@@ -1,0 +1,80 @@
+<html>
+	<head>
+        <title>Lights</title>
+        <script src="{{ url_for('static', filename='js/raphael.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/tabs.js') }}"></script>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tabs.css') }}">
+    <style>
+        .canvas {
+            margin: 0 auto;
+            position: relative;
+        }
+
+		.slider {
+			-webkit-appearance: none;
+			appearance: none;
+			background: #ada;
+            height: 50px;
+			outline: none;
+		}
+
+		.slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 25px;
+			height: 50px;
+			background: #2E7D32;
+			cursor: pointer;
+		}
+    </style>
+
+	</head>
+
+	<body>
+		<div class="tab">
+		  <button class="tablinks" onclick="openCity(event, 'living room')">Living Room</button>
+		  <button class="tablinks" onclick="openCity(event, 'kitchen')">Kitchen</button>
+		  <button class="tablinks" onclick="openCity(event, 'enrico')">Enrico</button>
+		  <button class="tablinks" onclick="openCity(event, 'marina')">Marina</button>
+		  <button class="tablinks" onclick="openCity(event, 'master bedroom')">Master Bedroom</button>
+		  <button class="tablinks" onclick="openCity(event, 'master bathroom')">Master Bathroom</button>
+		  <button class="tablinks" onclick="openCity(event, 'outside')">Outside</button>
+		  <button class="tablinks" onclick="openCity(event, 'game room')">Game Room</button>
+		</div>
+
+		<div id="living room" class="tabcontent">
+            <div id="living_room_canvas" class="canvas"></div>
+		</div>
+
+		<div id="kitchen" class="tabcontent">
+            <div id="kitchen_canvas" class="canvas"></div>
+		</div>
+
+		<div id="enrico" class="tabcontent">
+            <div id="enrico_canvas" class="canvas"></div>
+		</div>
+
+		<div id="marina" class="tabcontent">
+            <div id="marina_canvas" class="canvas"></div>
+		</div>
+
+		<div id="master bedroom" class="tabcontent">
+            <div id="master_bedroom_canvas" class="canvas"></div>
+		</div>
+
+		<div id="master bathroom" class="tabcontent">
+            <div id="master_bathroom_canvas" class="canvas"></div>
+		</div>
+
+		<div id="outside" class="tabcontent">
+            <div id="outside_canvas" class="canvas"></div>
+        </div>
+
+		<div id="game room" class="tabcontent">
+            <div id="game_room_canvas" class="canvas"></div>
+		</div>
+
+        <script src="{{ url_for('static', filename='js/blueprint.js') }}"></script>
+	</body>
+</html>
+

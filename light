@@ -1,0 +1,19 @@
+#!/Library/Frameworks/Python.framework/Versions/3.6/bin/python3
+
+import sys
+from lights import lights 
+
+def main(argv):
+    if len(argv) == 4:
+        area, action = f'{argv[0]} {argv[1]}', f'{argv[2]} {argv[3]}'
+    elif len(argv) == 3:
+        area, action = f'{argv[0]} {argv[1]}', argv[2]
+    elif len(argv) == 2:
+        area, action = argv
+    else:
+        print('usage: light [area] [action]')
+    lights(area, action)
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
+
