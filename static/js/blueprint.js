@@ -265,10 +265,15 @@ function outside() {
     var paper = new Raphael(div, width, height);
     div.style.width = width + 'px'
 
-    shape(paper, 350, 50, 100, 700, 'outside', 'counter', 'on', ['rotate']);
-    shape(paper, 450, 50, 400, 700, 'outside', 'main', 'on');
+    shape(paper, 750, 50, 100, 325, 'outside', 'counter', 'on', ['rotate']);
+    shape(paper, 350, 50, 400, 325, 'outside', 'main', 'on');
 
-    shape(paper, 50, 50, 250, 700, 'outside', 'off', 'off');
+    shape(paper, 350, 425, 250, 225, 'external', 'firepit', 'on');
+    shape(paper, 600, 425, 250, 225, 'external', 'deck & door', 'on');
+    shape(paper, 350, 650, 500, 100, 'external', 'house-front', 'on');
+
+    shape(paper, 50, 50, 250, 325, 'outside', 'off', 'off');
+    shape(paper, 50, 425, 250, 325, 'external', 'off', 'off');
 }
 
 function game_room() {

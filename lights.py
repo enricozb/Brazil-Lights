@@ -2,16 +2,7 @@ from subprocess import call
 
 rooms = {
     'test': {
-        '19': '020019ff',
-        '1a': '02001aff',
-        '1b': '02001bff',
-        '1c': '02001cff',
-        '1d': '02001dff',
-        '1e': '02001eff',
         '1f': '02001fff',
-        '2a': '02002aff',
-        '2b': '02002bff',
-        '2c': '02002cff',
     },
 
     'general' : {
@@ -29,7 +20,7 @@ rooms = {
         'center': '020012ff',
         'lateral': '020013ff',
         'bed': '020014ff',
-        'balcony': '02002cff', # off is 2b
+        'balcony': '02002cff', # (can also be 2a) off is 2b
         'off': '020015ff',
     },
 
@@ -87,6 +78,13 @@ rooms = {
         'sink': '020028ff',
         'toilet': '020027ff',
         'off': '020029ff',
+    },
+
+    'external': {
+        'house-front': '02003bff',
+        'deck & door': '02003cff',
+        'firepit': '02003dff',
+        'off': '02003eff'
     }
 }
 
