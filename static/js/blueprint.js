@@ -103,26 +103,24 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
     var label = action;
     var offset = 5;
 
+    rect.drag_dx = 0;
+    rect.drag_dy = 0;
+    rect.x_percent = 0;
+    rect.y_percent = 0;
+    rect.did_drag = false;
+
     if (on === 'on' && options.includes('dimmer')) {
         rect.drag(function(dx, dy, _, _, e) {
+                rect.did_drag = true;
+
                 var x_percent, y_percent;
-                if (e instanceof TouchEvent) {
-                    x_percent = (e.touches[0].pageX - paper.canvas.getBoundingClientRect().left - x) / w;
-                    y_percent = 1 - (e.touches[0].pageY - paper.canvas.getBoundingClientRect().top - y) / h;
 
-                    x_percent = cap(x_percent, 0, 1);
-                    y_percent = cap(y_percent, 0, 1);
+                rect.drag_dx = dx * 1.0 / w;
+                rect.drag_dy = -(dy * 1.0 / h);
+
+                x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
+                y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
                     
-                }
-                else  {
-                    x_percent = (e.offsetX - x) / w;
-                    y_percent = (e.offsetY - y) / h;
-
-                    x_percent = cap(x_percent, 0, 1);
-                    y_percent = cap(y_percent, 0, 1);
-                    
-                }
-
                 if (w * 1.0 / h < 1.5) {
                     rect.attr('fill', interpolate_color(y_percent));
                 }
@@ -130,26 +128,27 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
                     rect.attr('fill', interpolate_color(x_percent));
                 }
 
-                rect.x_percent = x_percent;
-                rect.y_percent = y_percent;
-
             }, undefined,
             // on end
             function() {
-                if (rect.x_percent === '' && rect.y_percent === '') {
+                if (rect.did_drag === false) {
                     rect.attr('fill', interpolate_color(1));
                     light(area, action);
                 }
                 else {
+                    rect.x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
+                    rect.y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
+
                     if (w * 1.0 / h < 1.5)  { 
                         dimmer(area, action, ~~(rect.y_percent * 255));
                     }
                     else {
                         dimmer(area, action, ~~(rect.x_percent * 255));
                     }
-                    rect.x_percent = ''
-                    rect.y_percent = ''
                 }
+                rect.drag_dx = 0;
+                rect.drag_dy = 0;
+                rect.did_drag = false;
             });
     }
 
