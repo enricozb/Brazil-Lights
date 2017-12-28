@@ -1,7 +1,4 @@
-window.onorientationchange = function() { 
-    console.log('reload on rotate');
-    window.location.reload();
-};
+var width, height;
 
 function cap(x, min, max) {
     if (x < min) {
@@ -47,15 +44,17 @@ function dimmer(area, action, value) {
     xmlHttp.send(data)
 }
 
-var w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    width = w.innerWidth || e.clientWidth || g.clientWidth,
-   	height = w.innerHeight|| e.clientHeight|| g.clientHeight;
+function compute_dimensions() {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        local_width = w.innerWidth || e.clientWidth || g.clientWidth,
+        local_height = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
-width -= 100;
-height -= 100;
+    width = local_width - 100;
+    height = local_height - 100;
+}
 
 var style_on = {
   stroke: "#333",
@@ -100,60 +99,9 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
         rect.attr(style_off);
     }
 
-    var label = action;
-    var offset = 5;
-
-    rect.drag_dx = 0;
-    rect.drag_dy = 0;
-    rect.x_percent = 0;
-    rect.y_percent = 0;
-    rect.did_drag = false;
-
-    if (on === 'on' && options.includes('dimmer')) {
-        rect.drag(function(dx, dy, _, _, e) {
-                rect.did_drag = true;
-
-                var x_percent, y_percent;
-
-                rect.drag_dx = dx * 1.0 / w;
-                rect.drag_dy = -(dy * 1.0 / h);
-
-                x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
-                y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
-                    
-                if (w * 1.0 / h < 1.5) {
-                    rect.attr('fill', interpolate_color(y_percent));
-                }
-                else {
-                    rect.attr('fill', interpolate_color(x_percent));
-                }
-
-            }, undefined,
-            // on end
-            function() {
-                if (rect.did_drag === false) {
-                    rect.attr('fill', interpolate_color(1));
-                    light(area, action);
-                }
-                else {
-                    rect.x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
-                    rect.y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
-
-                    if (w * 1.0 / h < 1.5)  { 
-                        dimmer(area, action, ~~(rect.y_percent * 255));
-                    }
-                    else {
-                        dimmer(area, action, ~~(rect.x_percent * 255));
-                    }
-                }
-                rect.drag_dx = 0;
-                rect.drag_dy = 0;
-                rect.did_drag = false;
-            });
-    }
-
-    rect.click(
-        function() {
+    // on click, press the button, and change styles 
+    // for respective buttons
+    var click_handler = function() {
             light(area, action);
             if (on !== 'on') {
                 room_rects = rooms[area];
@@ -162,29 +110,97 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
                 }
             }
             else {
-                rect.attr('fill', '#afa');
-                rect.x_percent = ''
-                rect.y_percent = ''
+                rect.attr('fill', interpolate_color(1));
+                rect.x_percent = 1;
+                rect.y_percent = 1;
             }
-        });
+        };
+
+    rect.drag_dx = 0;
+    rect.drag_dy = 0;
+    rect.x_percent = 0;
+    rect.y_percent = 0;
+    rect.did_drag = false;
+
+    // on drag, use dx & dy to compute new dimming values
+    var drag_handler = function(dx, dy, _, _, e) {
+            rect.did_drag = true;
+
+            var x_percent, y_percent;
+
+            rect.drag_dx = dx * 1.0 / w;
+            rect.drag_dy = -(dy * 1.0 / h);
+
+            x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
+            y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
+                
+            if (w * 1.0 / h < 1.5) {
+                rect.attr('fill', interpolate_color(y_percent));
+            }
+            else {
+                rect.attr('fill', interpolate_color(x_percent));
+            }
+
+        };
+
+    // on drag end, 2 cases: if it was a click, treat it like
+    // a click. If it was an actual drag, change (x/y)_percent
+    var drag_end_handler = function() {
+            console.log('drag ended');
+            if (rect.did_drag === false) {
+                click_handler();
+            }
+            else {
+                rect.x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
+                rect.y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
+
+                if (w * 1.0 / h < 1.5)  { 
+                    dimmer(area, action, ~~(rect.y_percent * 255));
+                }
+                else {
+                    dimmer(area, action, ~~(rect.x_percent * 255));
+                }
+            }
+            rect.drag_dx = 0;
+            rect.drag_dy = 0;
+            rect.did_drag = false;
+        };
+
+
+    if (options.includes('dimmer')) {
+        rect.drag(drag_handler, undefined, drag_end_handler);
+    }
+    else {
+        rect.click(click_handler);
+    }
 
     // Label
     setTimeout(function(){
         // Some weird bug in Raphael has the y-height doubled
-        rect.text = paper.text(x + w/2, (y + h / 2)/2 + offset, label); 
-        rect.text.click(function() {light(area, action)});
+        rect.text = paper.text(x + w/2, (y + h / 2)/2 + 5, action);
         rect.text.attr(text_style);
         if (options.includes('rotate')) {
             rect.text.rotate(90, x + w/2, (y + h / 2));
         }
-            
+        if (options.includes('dimmer')) {
+            rect.text.drag(drag_handler, undefined, drag_end_handler);
+        }
+        else {
+            rect.text.click(click_handler);
+        }
     });
 }
 
-function kitchen() {
-    var div = document.getElementById("kitchen_canvas");
+function create_canvas(name) {
+    var div = document.getElementById(name);
+    div.innerHTML = "";
     var paper = new Raphael(div, width, height);
     div.style.width = width + 'px';
+    return paper
+}
+
+function kitchen() {
+    var paper = create_canvas("kitchen_canvas"); 
 
     shape(paper, 350, 50, 100, 700, 'kitchen', 'lateral', 'on', ['rotate']);
     shape(paper, 450, 50, 400, 150, 'kitchen', 'sink', 'on');
@@ -195,9 +211,7 @@ function kitchen() {
 }
 
 function living_room() {
-    var div = document.getElementById("living_room_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("living_room_canvas"); 
 
     shape(paper, 350, 50, 400, 550, 'living room', 'center', 'on', ['dimmer']);
     shape(paper, 750, 50, 100, 550, 'living room', 'inner lateral', 'on', ['rotate', 'dimmer']);
@@ -210,9 +224,7 @@ function living_room() {
 }
 
 function enrico() {
-    var div = document.getElementById("enrico_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("enrico_canvas"); 
 
     shape(paper, 350, 50, 500, 150, 'enrico', 'window', 'on');
     shape(paper, 350, 200, 500, 550, 'enrico', 'center', 'on');
@@ -221,9 +233,7 @@ function enrico() {
 }
 
 function marina() {
-    var div = document.getElementById("marina_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("marina_canvas"); 
 
     shape(paper, 350, 50, 100, 700, 'marina', 'bed', 'on', ['rotate']);
     shape(paper, 450, 50, 300, 700, 'marina', 'center', 'on');
@@ -233,9 +243,7 @@ function marina() {
 }
 
 function master_bathroom() {
-    var div = document.getElementById("master_bathroom_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("master_bathroom_canvas"); 
 
     shape(paper, 350, 50, 100, 350, 'master bathroom', 'toilet', 'on', ['rotate']);
     shape(paper, 350, 400, 100, 350, 'master bathroom', 'sink', 'on', ['rotate']);
@@ -247,9 +255,7 @@ function master_bathroom() {
 }
 
 function master_bedroom() {
-    var div = document.getElementById("master_bedroom_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("master_bedroom_canvas");
 
     shape(paper, 350, 50, 100, 700, 'master bedroom', 'lateral', 'on', ['rotate']);
     shape(paper, 450, 50, 400, 150, 'master bedroom', 'door-side', 'on');
@@ -260,9 +266,7 @@ function master_bedroom() {
 }
 
 function outside() {
-    var div = document.getElementById("outside_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("outside_canvas"); 
 
     shape(paper, 750, 50, 100, 325, 'outside', 'counter', 'on', ['rotate']);
     shape(paper, 350, 50, 400, 325, 'outside', 'main', 'on');
@@ -276,9 +280,7 @@ function outside() {
 }
 
 function game_room() {
-    var div = document.getElementById("game_room_canvas");
-    var paper = new Raphael(div, width, height);
-    div.style.width = width + 'px'
+    var paper = create_canvas("game_room_canvas");
 
     shape(paper, 350, 50, 500, 150, 'game room', 'lateral', 'on');
     shape(paper, 350, 200, 500, 550, 'game room', 'center', 'on');
@@ -286,12 +288,27 @@ function game_room() {
     shape(paper, 50, 50, 250, 700, 'game room', 'off', 'off');
 }
 
-living_room();
-kitchen();
-enrico();
-marina();
-master_bedroom();
-master_bathroom();
-outside();
-game_room();
+function fill_tabs() {
+    // TODO
+    // var selected_tab = close_tabs();
 
+    compute_dimensions();
+
+    living_room();
+    kitchen();
+    enrico();
+    marina();
+    master_bedroom();
+    master_bathroom();
+    outside();
+    game_room();
+
+    // TODO
+    // open_tab(selected_tab);
+}
+
+window.onorientationchange = function() { 
+    fill_tabs();
+};
+
+fill_tabs();
