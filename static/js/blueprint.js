@@ -107,6 +107,8 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
                 room_rects = rooms[area];
                 for (var i = 0; i < room_rects.length; i++) {
                     room_rects[i].attr('fill', interpolate_color(0));
+                    room_rects[i].x_percent = 0;
+                    room_rects[i].y_percent = 0;
                 }
             }
             else {
@@ -121,9 +123,18 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
     rect.x_percent = 0;
     rect.y_percent = 0;
     rect.did_drag = false;
+    rect.brightness_label = paper.text(x + 5, y + 15, '')
+        .attr({
+            'text-anchor': 'start',
+            'font-size': 30,
+        });
 
     // on drag, use dx & dy to compute new dimming values
     var drag_handler = function(dx, dy, _, _, e) {
+            if (dx == 0 && dy == 0 && !rect.did_drag) {
+                return;
+            }
+
             rect.did_drag = true;
 
             var x_percent, y_percent;
@@ -133,12 +144,14 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
 
             x_percent = cap(rect.x_percent + rect.drag_dx, 0, 1);
             y_percent = cap(rect.y_percent + rect.drag_dy, 0, 1);
-                
+
             if (w * 1.0 / h < 1.5) {
                 rect.attr('fill', interpolate_color(y_percent));
+                rect.brightness_label.attr('text', y_percent.toFixed(2));
             }
             else {
                 rect.attr('fill', interpolate_color(x_percent));
+                rect.brightness_label.attr('text', x_percent.toFixed(2));
             }
 
         };
@@ -147,6 +160,7 @@ function shape(paper, x, y, w, h, area, action, on, options=[]) {
     // a click. If it was an actual drag, change (x/y)_percent
     var drag_end_handler = function() {
             console.log('drag ended');
+            rect.brightness_label.attr('text', '');
             if (rect.did_drag === false) {
                 click_handler();
             }
@@ -213,14 +227,12 @@ function kitchen() {
 function living_room() {
     var paper = create_canvas("living_room_canvas"); 
 
-    shape(paper, 350, 50, 400, 550, 'living room', 'center', 'on', ['dimmer']);
-    shape(paper, 750, 50, 100, 550, 'living room', 'inner lateral', 'on', ['rotate', 'dimmer']);
-    shape(paper, 350, 600, 500, 150, 'living room', 'outer lateral', 'on', ['dimmer']);
+    shape(paper, 350, 50, 400, 600, 'living room', 'center', 'on', ['dimmer']);
+    shape(paper, 750, 50, 100, 300, 'living room', 'doorway', 'on', ['rotate']);
+    shape(paper, 750, 350, 100, 300, 'living room', 'inner lateral', 'on', ['rotate', 'dimmer']);
+    shape(paper, 350, 650, 500, 100, 'living room', 'outer lateral', 'on', ['dimmer']);
 
     shape(paper, 50, 50, 250, 700, 'living room', 'off', 'off');
-
-    // Sliders
-
 }
 
 function enrico() {
@@ -237,7 +249,7 @@ function marina() {
 
     shape(paper, 350, 50, 100, 700, 'marina', 'bed', 'on', ['rotate']);
     shape(paper, 450, 50, 300, 700, 'marina', 'center', 'on');
-    shape(paper, 750, 50, 100, 700, 'marina', 'lateral', 'on', ['rotate']);
+    shape(paper, 750, 50, 100, 700, 'marina', 'lateral', 'on', ['rotate', 'dimmer']);
 
     shape(paper, 50, 50, 250, 700, 'marina', 'off', 'off');
 }
@@ -263,6 +275,16 @@ function master_bedroom() {
     shape(paper, 450, 600, 400, 150, 'master bedroom', 'window-side', 'on');
 
     shape(paper, 50, 50, 250, 700, 'master bedroom', 'off', 'off');
+}
+
+function hallway() {
+    var paper = create_canvas("hallway_canvas");
+
+    shape(paper, 350, 50, 200, 700, 'hallway', 'rooms', 'on');
+    shape(paper, 550, 50, 100, 700, 'hallway', 'enrico', 'on', ['rotate']);
+    shape(paper, 650, 50, 200, 700, 'hallway', 'overlook', 'on');
+
+    shape(paper, 50, 50, 250, 700, 'hallway', 'off', 'off');
 }
 
 function outside() {
@@ -300,6 +322,7 @@ function fill_tabs() {
     marina();
     master_bedroom();
     master_bathroom();
+    hallway();
     outside();
     game_room();
 

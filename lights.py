@@ -18,7 +18,7 @@ rooms = {
 
     'marina': {
         'center': '020012ff',
-        'lateral': '020013ff',
+        'lateral': ('020013ff', '140044696d6d6572205303{:02x}ff'),
         'bed': '020014ff',
         'balcony': '02002cff', # (can also be 2a) off is 2b
         'off': '020015ff',
@@ -28,7 +28,6 @@ rooms = {
         'overlook': '020006ff',
         'rooms': '020007ff',
         'enrico': '020008ff',
-        'doorway': '020009ff',
         'off': '02002eff',
     },
 
@@ -52,6 +51,7 @@ rooms = {
         'outer lateral': ('020003ff', '140044494d4d4552204904{:02x}ff'),
         'inner lateral': ('020004ff', '140044494d4d4552204901{:02x}ff'),
         'small stairs': '020038ff',
+        'doorway': '020009ff',
         'off': '020005ff'
     },
 
