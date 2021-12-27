@@ -238,7 +238,7 @@ function living_room() {
 function enrico() {
     var paper = create_canvas("enrico_canvas"); 
 
-    shape(paper, 350, 50, 500, 150, 'enrico', 'window', 'on');
+    shape(paper, 350, 50, 500, 150, 'enrico', 'window', 'on', ['dimmer']);
     shape(paper, 350, 200, 500, 550, 'enrico', 'center', 'on');
 
     shape(paper, 50, 50, 250, 700, 'enrico', 'off', 'off');
